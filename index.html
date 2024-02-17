@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Emotion Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="intro">
+            <h1>Welcome to Facial Emotion Recognition</h1>
+            <p>Experience the magic of emotion detection through your webcam!</p>
+        </div>
+        <div id="form-container" class="form-container">
+            <form id="emotion-form">
+                <label for="username">Enter your name:</label>
+                <input type="text" id="username" name="username" required>
+                <button type="submit" onclick="startEmotionDetection()">Start Emotion Detection</button>
+            </form>
+        </div>
+        <div id="video-container" class="video-container" style="display: none;">
+            <img id="video_feed" src="" alt="Video Feed">
+        </div>
+        <div id="emotion-results" class="emotion-results">
+            <!-- Emotion results will be displayed here after submission -->
+        </div>
+    </div>
+
+
+
+<script>
+    document.getElementById('emotion-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        startEmotionDetection();
+    });
+
+    async function startEmotionDetection() {
+        var username = document.getElementById('username').value;
+        document.getElementById('username').disabled = true;
+        document.getElementById('form-container').style.display = 'none';
+
+        var videoContainer = document.getElementById('video-container');
+        videoContainer.style.display = 'block';
+
+        var videoFeed = document.getElementById('video_feed');
+        videoFeed.src = '/video_feed';
+
+        // Send a POST request to start emotion detection
+        await fetch('/start_emotion_detection', {
+            method: 'POST',
+        });
+
+        // Wait for a short duration to allow time for the first emotion analysis
+        // (You may need to adjust this delay based on your application)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Retrieve the actual emotion value from the server
+        var emotionResponse = await fetch('/get_emotion');
+        var emotionData = await emotionResponse.json();
+
+        // Update the HTML with the detected emotion
+        var emotionResults = document.getElementById('emotion-results');
+        emotionResults.innerHTML = `<h2>Hello, ${username}!</h2><p>Emotion: ${emotionData.emotion}</p>`;
+        emotionResults.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
